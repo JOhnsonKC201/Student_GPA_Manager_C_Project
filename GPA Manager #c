@@ -1,0 +1,138 @@
+//Johnson K C
+// This code manage the list of student entry and recursively average the gpa
+// and sort the gpa by pointer swaping method
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// =========================== users data Modeling  ===========================
+typedef struct {
+    char  name[30];
+    int   student_id;
+    float gpa;
+} Student;
+
+// =========================== Input and Output Functions ===========================
+void input_Students(Student *students, int count) {
+    printf("--------- Student's Details -----------\n");
+    for (int i = 0; i < count; i++) {
+        printf("Student #%d - ", i + 1);
+
+        printf("Name: ");
+        scanf("%29s", students[i].name);
+
+        printf(" ID: ");
+        scanf("%d", &students[i].student_id);
+
+        printf(" GPA: ");
+        scanf("%f", &students[i].gpa);
+    }
+}
+
+void print_Students(const Student *students, int count) {
+    printf("\n");
+    printf("%-10s %-10s %-10s\n", "Name", "StudentID ", "GPA");
+    printf("================================================+\n");
+    int i = 0;
+    while(i < count) {
+        printf("%-10s %-10d %-10.2f\n",
+               students[i].name,
+               students[i].student_id,
+               students[i].gpa);
+        i++;
+    }
+}
+
+// used Selection sorting asending order
+void sortByGPA(Student *students, int count) {
+    for (int i = 0; i < count - 1; i++) {
+        int minIndx = i;
+
+        // Going through list to find low gpa
+        for (int j = i + 1; j < count; j++) {
+            if (students[j].gpa < students[minIndx].gpa) {
+                minIndx = j;
+            }
+        }
+        // if I found low gpa, I swap
+        if (minIndx != i) {
+            swap_Students(&students[i], &students[minIndx]);
+        }
+    }
+}
+
+//=========================== Calculation Functions ===========================
+float calcAvg_GPA(const Student *students, int count) {
+    if (count <= 0) {
+         return 0.0f;
+    }
+    if (count == 1) {
+         return students[0].gpa;
+    }
+    // recursive
+    float prevAvg = calcAvg_GPA(students, count - 1);
+
+    return ((count - 1) * prevAvg + students[count - 1].gpa) / count;
+}
+
+// =========================== Sorting Utilities =======================
+void swap_Students(Student *first, Student *second) {
+    //   swapping using temporary variable
+    Student temp = *first;
+     *first = *second;
+    *second = temp;
+}
+
+// =========================== Analysis the Functions ===========================
+Student topStudent(const Student *students, int count) {
+    int topIndex = 0;  // lets assume first student top
+    for (int i = 1; i < count; i++) {
+        if (students[i].gpa > students[topIndex].gpa) {
+            topIndex = i;
+        }
+    }
+    return students[topIndex];
+}
+
+//main
+int main(void) {
+    int numStudents;
+    printf("=== Student Details ===\n");
+    printf("How many students are there? ");
+    //user input validations
+    if (scanf("%d", &numStudents) != 1 || numStudents <= 0) {
+        printf("Error: Please enter a valid Student number eg >0 .\n");
+        return 1;
+    }
+
+    // Allocateing the memory for students array
+    Student *studentList = (Student *)malloc(numStudents * sizeof(Student));
+
+    // Get the student data from user
+    input_Students(studentList, numStudents);
+
+    printf("\n======= Student List =======");
+    print_Students(studentList, numStudents);
+
+    // Calculation for average gpa
+    float averageGPA = calcAvg_GPA(studentList, numStudents);
+    printf("\nClass Average GPA: %.2f\n", averageGPA);
+
+    // Sort students by GPA (lowest to thre highest)
+    sortByGPA(studentList, numStudents);
+
+    printf("\n====== Students Sorted by GPA ======");
+    print_Students(studentList, numStudents);
+
+    // display the top performing student
+    Student bestStudent = topStudent(studentList, numStudents);
+    printf("\n Top Performer: %s student ID: %d with GPA: %.2f\n",
+           bestStudent.name,
+           bestStudent.student_id,
+           bestStudent.gpa);
+
+    // Clean the memory then
+    free(studentList);
+    printf("\nProgram completed successfully.\n");
+    return 0;
+}
